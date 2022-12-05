@@ -3,9 +3,13 @@
  * Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
  * session persistence, api calls, and more.
  * */
-const Alexa = ('ask-sdk-core');
-const invocationName = "get color of zoom meeting light";
-const status= "Offline";
+const Alexa = require('ask-sdk-core');
+const invocationName = "zoom meeting light";
+const { CallTracker } = require('assert');
+const fs = require('fs');
+const webhookfile = fs.readFileSync('./package.json', 'utf-8');
+const webhook= JSON.parse(webhookfile);
+const status= (webhook.payload.object.presence_status);
 
 const LaunchRequestHandler = {
     canHandle(handlerInput) {
@@ -21,134 +25,70 @@ const LaunchRequestHandler = {
             .getResponse();
     }
 };
-if (status === 'Available') {
-    console.log("the light is green");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is green.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === 'In_Meeting') {
-    console.log ("The light is Red");
-        const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is orange.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === 'Offline') {
-    console.log ("The light is Off");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is off.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === 'Inactive') {
-    console.log ("The light is Gray");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is Gray.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === 'In_Calendar_Event') {
-    console.log ("The light is Blue");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is Blue.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === 'On_Phone_Call') {
-    console.log ("The light is Crimson");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is Crimson.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else if (status === "Do_Not_Disturb") {
-    console.log("the light is orange");
-    const zoomMeetingLightIntentHandler = {
-        canHandle(handlerInput) {
-            return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-                && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-        },
-            handle(handlerInput) {
-            const speakOutput = "The light is orange.";
-    
-            return handlerInput.responseBuilder
-                .speak(speakOutput)
-                //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-                .getResponse();
-        }
-    };
-} else 
-console.log("something went wrong");
 const zoomMeetingLightIntentHandler = {
-    canHandle(handlerInput) {
-        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
-            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
-    },
-        handle(handlerInput) {
-        const speakOutput = "Something went wrong.";
-
-        return handlerInput.responseBuilder
-            .speak(speakOutput)
-            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
-            .getResponse();
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+    && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
+  },
+  handle(handlerInput) {
+    if (status === 'Available') {
+        const speakOutput = "The light is green.";
+        console.log ("The light is green.")
+            return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            } 
+            else if (status === 'In_Meeting') {
+                console.log ("The light is Red");
+                const speakOutput = "The light is red.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Offline') {
+                console.log ("The light is Off");
+                const speakOutput = "The light is off.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Inactive') {
+                console.log ("The light is Gray");
+                const speakOutput = "The light is Gray.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'In_Calendar_Event') {
+                console.log ("The light is Blue");
+                const speakOutput = "The light is Blue.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'On_Phone_Call') {
+                console.log ("The light is Crimson");
+                const speakOutput = "The light is Crimson.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Do_Not_Disturb') {
+                console.log ("The light is Orange");
+                const speakOutput = "The light is Orange.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else{
+                return handlerInput.responseBuilder
+                .speak('You need to tell me your favorite color first.')
+                .reprompt('Please tell me your favorite color.')
+                .addElicitSlotDirective('favoriteColor')
+                .getResponse();
+            }
+        }     
     }
-};
 const HelpIntentHandler = {
     canHandle(handlerInput) {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
@@ -207,6 +147,9 @@ const SessionEndedRequestHandler = {
         return Alexa.getRequestType(handlerInput.requestEnvelope) === 'SessionEndedRequest';
     },
     handle(handlerInput) {
+            const reason = handlerInput.requestEnvelope.request.reason;
+        console.log("==== SESSION ENDED WITH REASON ======");
+        console.log(reason); 
         console.log(`~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`);
         // Any cleanup logic goes here.
         return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
@@ -252,6 +195,7 @@ const ErrorHandler = {
             .getResponse();
     }
 };
+
 /**
  * This handler acts as the entry point for your skill, routing all request and response
  * payloads to the handlers above. Make sure any new handlers or interceptors you've
