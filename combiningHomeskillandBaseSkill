@@ -1,0 +1,369 @@
+// -*- coding: utf-8 -*-
+
+// Copyright 2021 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+//
+// SPDX-License-Identifier: LicenseRef-.amazon.com.-AmznSL-1.0
+// Licensed under the Amazon Software License (the "License")
+// You may not use this file except in compliance with the License.
+// A copy of the License is located at http://aws.amazon.com/asl/
+//
+// This file is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific
+// language governing permissions and limitations under the License.
+'use strict';
+/* *
+ * This sample demonstrates handling intents from an Alexa skill using the Alexa Skills Kit SDK (v2).
+ * Please visit https://alexa.design/cookbook for additional examples on implementing slots, dialog management,
+ * session persistence, api calls, and more.
+ * 
+ *///const Alexa = require('ask-sdk-core');
+const invocationName = "zoom meeting light";
+const { CallTracker } = require('assert');
+const fs = require('fs');
+const webhookfile = fs.readFileSync('./package.json', 'utf-8');
+const webhook= JSON.parse(webhookfile);
+const status= (webhook.payload.object.presence_status);
+
+const LaunchRequestHandler = {
+    canHandle(handlerInput) {
+        console.log("launch request");
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'LaunchRequest';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'you have launched the skill successfully, say what is my current status?';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+const zoomMeetingLightIntentHandler = {
+  canHandle(handlerInput) {
+    return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+    && Alexa.getIntentName(handlerInput.requestEnvelope) === 'zoomMeetingLightIntent';
+  },
+  handle(handlerInput) {
+    if (status === 'Available') {
+        const speakOutput = "The light is green.";
+        console.log ("The light is green.")
+            return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            } 
+            else if (status === 'In_Meeting') {
+                console.log ("The light is Red");
+                const speakOutput = "The light is red.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Offline') {
+                console.log ("The light is Off");
+                const speakOutput = "The light is off.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Inactive') {
+                console.log ("The light is Gray");
+                const speakOutput = "The light is Gray.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'In_Calendar_Event') {
+                console.log ("The light is Blue");
+                const speakOutput = "The light is Blue.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'On_Phone_Call') {
+                console.log ("The light is Crimson");
+                const speakOutput = "The light is Crimson.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else if (status === 'Do_Not_Disturb') {
+                console.log ("The light is Orange");
+                const speakOutput = "The light is Orange.";
+                return handlerInput.responseBuilder
+                .speak(speakOutput)
+                .getResponse();
+            }
+            else{
+                return handlerInput.responseBuilder
+                .speak('You need to tell me your favorite color first.')
+                .reprompt('Please tell me your favorite color.')
+                .addElicitSlotDirective('favoriteColor')
+                .getResponse();
+            }
+        }     
+    }
+const HelpIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.HelpIntent';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'You can say hello to me! How can I help?';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+const CancelAndStopIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && (Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.CancelIntent'
+                || Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.StopIntent');
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Goodbye!';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .getResponse();
+    }
+};
+/* *
+ * FallbackIntent triggers when a customer says something that doesn’t map to any intents in your skill
+ * It must also be defined in the language model (if the locale supports it)
+ * This handler can be safely added but will be ingnored in locales that do not support it yet 
+ * */
+const FallbackIntentHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest'
+            && Alexa.getIntentName(handlerInput.requestEnvelope) === 'AMAZON.FallbackIntent';
+    },
+    handle(handlerInput) {
+        const speakOutput = 'Sorry, I don\'t know about that. Please try again.';
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+/* *
+ * SessionEndedRequest notifies that a session was ended. This handler will be triggered when a currently open 
+ * session is closed for one of the following reasons: 1) The user says "exit" or "quit". 2) The user does not 
+ * respond or says something that does not match an intent defined in your voice model. 3) An error occurs 
+ * */
+const SessionEndedRequestHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'SessionEndedRequest';
+    },
+    handle(handlerInput) {
+            const reason = handlerInput.requestEnvelope.request.reason;
+        console.log("==== SESSION ENDED WITH REASON ======");
+        console.log(reason); 
+        console.log(`~~~~ Session ended: ${JSON.stringify(handlerInput.requestEnvelope)}`);
+        // Any cleanup logic goes here.
+        return handlerInput.responseBuilder.getResponse(); // notice we send an empty response
+    }
+};
+/* *
+ * The intent reflector is used for interaction model testing and debugging.
+ * It will simply repeat the intent the user said. You can create custom handlers for your intents 
+ * by defining them above, then also adding them to the request handler chain below 
+ * */
+const IntentReflectorHandler = {
+    canHandle(handlerInput) {
+        return Alexa.getRequestType(handlerInput.requestEnvelope) === 'IntentRequest';
+    },
+    handle(handlerInput) {
+        const intentName = Alexa.getIntentName(handlerInput.requestEnvelope);
+        const speakOutput = `You just triggered ${intentName}`;
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            //.reprompt('add a reprompt if you want to keep the session open for the user to respond')
+            .getResponse();
+    }
+};
+/**
+ * Generic error handling to capture any syntax or routing errors. If you receive an error
+ * stating the request handler chain is not found, you have not implemented a handler for
+ * the intent being invoked or included it in the skill builder below 
+ * */
+const ErrorHandler = {
+    canHandle(handlerInput, error) {
+        return true;
+    },
+    handle(handlerInput, error) {
+        console.log("==== ERROR =====")
+        console.log(error)
+        const speakOutput = 'Sorry, I had trouble doing what you asked. Please try again.';
+        console.log(`~~~~ Error handled: ${JSON.stringify(error)}`);
+
+        return handlerInput.responseBuilder
+            .speak(speakOutput)
+            .reprompt(speakOutput)
+            .getResponse();
+    }
+};
+
+/**
+ * This handler acts as the entry point for your skill, routing all request and response
+ * payloads to the handlers above. Make sure any new handlers or interceptors you've
+ * defined are included below. The order matters - they're processed top to bottom 
+ * */
+ 
+exports.handler = function (request, context) {
+    if (request.directive.header.namespace === 'Alexa.Discovery' && request.directive.header.name === 'Discover') {
+        log("DEBUG:", "Discover request",  JSON.stringify(request));
+        handleDiscovery(request, context, "");
+    }
+    else if (request.directive.header.namespace === 'Alexa.PowerController') {
+        if (request.directive.header.name === 'TurnOn' || request.directive.header.name === 'TurnOff') {
+            log("DEBUG:", "TurnOn or TurnOff Request", JSON.stringify(request));
+            handlePowerControl(request, context);
+        }
+    }
+    else if (request.directive.header.namespace === 'Alexa.Authorization' && request.directive.header.name === 'AcceptGrant') {
+        handleAuthorization(request, context)
+    }
+
+    function handleAuthorization(request, context) {
+        // Send the AcceptGrant response
+        var payload = {};
+        var header = request.directive.header;
+        header.name = "AcceptGrant.Response";
+        log("DEBUG", "AcceptGrant Response: ", JSON.stringify({ header: header, payload: payload }));
+        context.succeed({ event: { header: header, payload: payload } });
+    }
+
+    function handleDiscovery(request, context) {
+        // Send the discovery response
+        var payload = {
+            "endpoints":
+            [
+                {
+                    "endpointId": "sample-bulb-01",
+                    "manufacturerName": "Smart Device Company",
+                    "friendlyName": "Livingroom lamp",
+                    "description": "Virtual smart light bulb",
+                    "displayCategories": ["LIGHT"],
+                    "additionalAttributes":  {
+                        "manufacturer" : "Sample Manufacturer",
+                        "model" : "Sample Model",
+                        "serialNumber": "U11112233456",
+                        "firmwareVersion" : "1.24.2546",
+                        "softwareVersion": "1.036",
+                        "customIdentifier": "Sample custom ID"
+                    },
+                    "cookie": {
+                        "key1": "arbitrary key/value pairs for skill to reference this endpoint.",
+                        "key2": "There can be multiple entries",
+                        "key3": "but they should only be used for reference purposes.",
+                        "key4": "This is not a suitable place to maintain current endpoint state."
+                    },
+                    "capabilities":
+                    [
+                        {
+                            "interface": "Alexa.PowerController",
+                            "version": "3",
+                            "type": "AlexaInterface",
+                            "properties": {
+                                "supported": [{
+                                    "name": "powerState"
+                                }],
+                                 "retrievable": true
+                            }
+                        },
+                        {
+                        "type": "AlexaInterface",
+                        "interface": "Alexa.EndpointHealth",
+                        "version": "3.2",
+                        "properties": {
+                            "supported": [{
+                                "name": "connectivity"
+                            }],
+                            "retrievable": true
+                        }
+                    },
+                    {
+                        "type": "AlexaInterface",
+                        "interface": "Alexa",
+                        "version": "3"
+                    }
+                    ]
+                }
+            ]
+        };
+        var header = request.directive.header;
+        header.name = "Discover.Response";
+        log("DEBUG", "Discovery Response: ", JSON.stringify({ header: header, payload: payload }));
+        context.succeed({ event: { header: header, payload: payload } });
+    }
+
+    function log(message, message1, message2) {
+        console.log(message + message1 + message2);
+    }
+
+    function handlePowerControl(request, context) {
+        // get device ID passed in during discovery
+        var requestMethod = request.directive.header.name;
+        var responseHeader = request.directive.header;
+        responseHeader.namespace = "Alexa";
+        responseHeader.name = "Response";
+        responseHeader.messageId = responseHeader.messageId + "-R";
+        // get user token pass in request
+        var requestToken = request.directive.endpoint.scope.token;
+        var powerResult;
+
+        if (requestMethod === "TurnOn") {
+
+            // Make the call to your device cloud for control
+            // powerResult = stubControlFunctionToYourCloud(endpointId, token, request);
+            powerResult = "ON";
+        }
+       else if (requestMethod === "TurnOff") {
+            // Make the call to your device cloud for control and check for success
+            // powerResult = stubControlFunctionToYourCloud(endpointId, token, request);
+            powerResult = "OFF";
+        }
+        // Return the updated powerState.  Always include EndpointHealth in your Alexa.Response
+        // Datetime format for timeOfSample is ISO 8601, `YYYY-MM-DDThh:mm:ssZ`.
+        var contextResult = {
+            "properties": [{
+                "namespace": "Alexa.PowerController",
+                "name": "powerState",
+                "value": powerResult,
+                "timeOfSample": "2022-09-03T16:20:50.52Z", //retrieve from result.
+                "uncertaintyInMilliseconds": 50
+            },
+            {
+                "namespace": "Alexa.EndpointHealth",
+                "name": "connectivity",
+                "value": {
+                "value": "OK"
+            },
+            "timeOfSample": "2022-09-03T22:43:17.877738+00:00",
+            "uncertaintyInMilliseconds": 0
+            }]
+        };
+        var response = {
+            context: contextResult,
+            event: {
+                header: responseHeader,
+                endpoint: {
+                    scope: {
+                        type: "BearerToken",
+                        token: requestToken
+                    },
+                    endpointId: "sample-bulb-01"
+                },
+                payload: {}
+            }
+        };
+        log("DEBUG", "Alexa.PowerController ", JSON.stringify(response));
+        context.succeed(response);
+    }
+};
