@@ -47,7 +47,8 @@ const zoomMeetingLightIntentHandler = {
     if (status === 'Available') {
         const speakOutput = "The light is green.";
         console.log ("The light is green.")
-            return handlerInput.responseBuilder
+        function (requestMethod === "TurnOn")
+        return handlerInput.responseBuilder
                 .speak(speakOutput)
                 .getResponse();
             } 
